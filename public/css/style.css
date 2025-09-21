@@ -1,0 +1,542 @@
+/* Lab Exam Portal Styles */
+
+:root {
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --success-color: #059669;
+    --danger-color: #dc2626;
+    --warning-color: #d97706;
+    --info-color: #0891b2;
+    --light-gray: #f8fafc;
+    --dark-gray: #374151;
+    --border-color: #e5e7eb;
+    --text-muted: #6b7280;
+}
+
+/* Global Styles */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: var(--dark-gray);
+}
+
+.h-100 {
+    min-height: 100vh;
+}
+
+/* Login Page Styles */
+.login-page {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.login-form-section {
+    background: white;
+    min-height: 100vh;
+}
+
+.login-form-container {
+    animation: slideInUp 0.8s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Logo Styles */
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.logo-circle {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, #4f46e5 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+}
+
+/* Form Styles */
+.form-floating {
+    position: relative;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}
+
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}
+
+.rounded-pill {
+    border-radius: 50px !important;
+}
+
+/* Button Styles */
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #4f46e5 100%);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-hover) 0%, #4338ca 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--success-color) 0%, #047857 100%);
+    border: none;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(5, 150, 105, 0.4);
+}
+
+/* CAPTCHA Styles - UPDATED */
+.captcha-container {
+    background: rgba(248, 250, 252, 0.9);
+    border: 2px dashed var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.captcha-container:hover {
+    border-color: var(--primary-color);
+    background: rgba(248, 250, 252, 1);
+}
+
+.captcha-container .captcha-code {
+    font-family: 'Courier New', monospace;
+    font-size: 18px;
+    letter-spacing: 2px;
+    background: linear-gradient(45deg, #ffffff, #f8fafc);
+    color: var(--dark-gray);
+    border: 2px solid #e5e7eb;
+    font-weight: 700;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    min-height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.captcha-container input {
+    font-family: 'Segoe UI', sans-serif;
+    font-weight: 500;
+    height: 45px;
+    border: 2px solid #d1d5db;
+    transition: all 0.3s ease;
+}
+
+.captcha-container input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+    background: #ffffff;
+}
+
+.captcha-container input::placeholder {
+    font-weight: 400;
+    color: #9ca3af;
+    opacity: 1;
+}
+
+.captcha-container .btn {
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Responsive CAPTCHA */
+@media (max-width: 768px) {
+    .captcha-container .row {
+        --bs-gutter-x: 0.5rem;
+    }
+    
+    .captcha-container .col-4 {
+        flex: 0 0 35%;
+        max-width: 35%;
+    }
+    
+    .captcha-container .col-6 {
+        flex: 0 0 45%;
+        max-width: 45%;
+    }
+    
+    .captcha-container .col-2 {
+        flex: 0 0 20%;
+        max-width: 20%;
+    }
+    
+    .captcha-container .captcha-code {
+        font-size: 16px;
+        letter-spacing: 1px;
+    }
+}
+
+@media (max-width: 576px) {
+    .captcha-container {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+        max-width: 100%;
+    }
+    
+    .captcha-input input {
+        width: 100% !important;
+        max-width: 200px;
+    }
+}
+
+/* Lab Image Section */
+.lab-image-section {
+    background-image: 
+            linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), 
+            url('/images/lab-background.jpg');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.lab-image-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.9) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lab-content {
+    text-align: center;
+    padding: 2rem;
+    max-width: 500px;
+}
+
+.lab-info h3 {
+    font-weight: 300;
+    margin-bottom: 1.5rem;
+    font-size: 2.5rem;
+    line-height: 1.2;
+}
+
+.lab-info p {
+    font-size: 1.2rem;
+    line-height: 1.6;
+}
+
+/* Alert Styles */
+.alert {
+    border: none;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    color: var(--danger-color);
+    border-left: 4px solid var(--danger-color);
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    color: var(--success-color);
+    border-left: 4px solid var(--success-color);
+}
+
+/* Testing Notice */
+.testing-notice {
+    padding: 1rem;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-radius: 12px;
+    border: 1px solid #93c5fd;
+    margin-top: 1rem;
+}
+
+/* Signup Page */
+.signup-page {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+}
+
+.signup-form-container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .login-form-section {
+        min-height: auto;
+        padding: 2rem 0;
+    }
+    
+    .lab-image-section {
+        display: none !important;
+    }
+    
+    .lab-info h3 {
+        font-size: 2rem;
+    }
+    
+    .captcha-container {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .captcha-input input {
+        width: 100% !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .login-form-container,
+    .signup-form-container {
+        margin: 1rem;
+        padding: 2rem 1.5rem;
+    }
+    
+    .logo-circle {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .lab-info h3 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Loading States */
+.btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Focus States for Accessibility */
+.form-control:focus,
+.form-select:focus,
+.btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--light-gray);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-hover);
+}
+
+/* Exam Card Styles */
+.exam-card {
+    border-left: 4px solid #fbbf24;
+    transition: all 0.3s ease;
+}
+
+.exam-upcoming {
+    border-left-color: #f59e0b;
+}
+
+.exam-past {
+    border-left-color: #6b7280;
+    opacity: 0.8;
+}
+
+.exam-header {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%);
+    border-bottom: 1px solid #fcd34d;
+}
+
+.exam-past .exam-header {
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 50%);
+    border-bottom: 1px solid #d1d5db;
+}
+
+.exam-title {
+    color: var(--dark-gray);
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.exam-meta {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.class-code {
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+}
+
+.exam-datetime {
+    background: rgba(239, 246, 255, 0.5);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #bfdbfe;
+}
+
+.datetime-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.datetime-item:last-child {
+    margin-bottom: 0;
+}
+
+.time-remaining {
+    font-weight: 500;
+}
+
+.duration {
+    font-style: italic;
+}
+
+.exam-details {
+    background: rgba(240, 253, 244, 0.5);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #bbf7d0;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.detail-item:last-child {
+    margin-bottom: 0;
+}
+
+.detail-label {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.detail-value {
+    font-weight: 600;
+    color: var(--dark-gray);
+}
+
+.faculty-info {
+    background: rgba(245, 245, 245, 0.5);
+    padding: 0.75rem;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.faculty-name {
+    font-weight: 500;
+    color: var(--dark-gray);
+}
+
+.exam-description,
+.exam-instructions {
+    background: rgba(254, 252, 232, 0.5);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #fde047;
+    margin-top: 1rem;
+}
+
+.instructions-content {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--dark-gray);
+}
+
+.exam-countdown {
+    display: flex;
+    align-items: center;
+}
+
+.exam-actions .btn {
+    transition: all 0.2s ease;
+}
+
+.exam-actions .btn:hover {
+    transform: translateY(-1px);
+}
+
+.view-toggle-buttons .btn-check:checked + .btn {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Responsive exam cards */
+@media (max-width: 768px) {
+    .exam-datetime .row,
+    .exam-details .row {
+        --bs-gutter-x: 0.5rem;
+    }
+    
+    .datetime-item,
+    .detail-item {
+        margin-bottom: 1rem;
+    }
+    
+    .exam-actions .btn {
+        width: 100%;
+        font-size: 0.875rem;
+    }
+}

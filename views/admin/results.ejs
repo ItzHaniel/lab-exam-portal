@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/dashboard.css" rel="stylesheet">
+</head>
+<body class="dashboard-body">
+    
+<!-- Top Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <div class="d-flex align-items-center">
+            <button class="btn btn-outline-light d-lg-none me-2" type="button" id="sidebarToggle">
+                <i class="bi bi-list"></i>
+            </button>
+            <a class="navbar-brand d-flex align-items-center" href="/admin/dashboard">
+                <i class="bi bi-shield-check me-2 text-warning" style="font-size: 1.5rem;"></i>
+                <span class="fw-bold">Admin Portal</span>
+            </a>
+        </div>
+        
+        <!-- User Menu -->
+        <div class="dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center text-white" 
+               href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                <img src="<%= user.profileImage || '/images/default-avatar.png' %>" 
+                     alt="Avatar" width="32" height="32" class="rounded-circle me-2">
+                <span class="d-none d-sm-inline">
+                    <%= user.firstName %> <%= user.lastName %>
+                </span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <div class="dropdown-header">
+                        <strong><%= user.firstName %> <%= user.lastName %></strong><br>
+                        <small class="text-muted"><%= user.email %></small><br>
+                        <span class="badge bg-danger">Admin</span>
+                    </div>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="/admin/settings">
+                    <i class="bi bi-gear me-2"></i>Settings
+                </a></li>
+                <li><a class="dropdown-item" href="#" onclick="confirmLogout()">
+                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                </a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar" style="background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);">
+    <div class="sidebar-header">
+        <h5 class="text-white mb-0">Admin Panel</h5>
+        <small class="text-white-50">System Management</small>
+    </div>
+    
+    <ul class="sidebar-nav">
+        <li class="nav-item">
+            <a class="nav-link <%= currentPage === 'dashboard' ? 'active' : '' %>" href="/admin/dashboard">
+                <i class="bi bi-speedometer2"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link <%= currentPage === 'faculty' ? 'active' : '' %>" href="/admin/faculty">
+                <i class="bi bi-person-badge"></i>
+                <span>Faculty Management</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link <%= currentPage === 'students' ? 'active' : '' %>" href="/admin/students">
+                <i class="bi bi-people"></i>
+                <span>Student Management</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link <%= currentPage === 'classes' ? 'active' : '' %>" href="/admin/classes">
+                <i class="bi bi-book"></i>
+                <span>Class Management</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link <%= currentPage === 'results' ? 'active' : '' %>" href="/admin/results">
+                <i class="bi bi-bar-chart-line"></i>
+                <span>Results Monitoring</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link <%= currentPage === 'attendance' ? 'active' : '' %>" href="/admin/attendance">
+                <i class="bi bi-clipboard-check"></i>
+                <span>Attendance Tracking</span>
+            </a>
+        </li>
+    </ul>
+</div>
+    
+    <div class="main-content">
+        <div class="content-wrapper">
+            
+            <div class="page-header">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h1 class="page-title">
+                            <i class="bi bi-bar-chart-line me-2"></i>
+                            Results Monitoring
+                        </h1>
+                        <p class="page-subtitle">Monitor student performance across all classes</p>
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-success btn-sm" onclick="exportAllResults()">
+                            <i class="bi bi-download me-1"></i>
+                            Export All Results
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Filters -->
+            <div class="card mb-4">
+                <div class="card-body py-3">
+                    <form method="GET" class="row align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label">Filter by Status</label>
+                            <select class="form-select" name="status" onchange="this.form.submit()">
+                                <option value="all" <%= selectedStatus === 'all' ? 'selected' : '' %>>All Results</option>
+                                <option value="Pass" <%= selectedStatus === 'Pass' ? 'selected' : '' %>>Passed Only</option>
+                                <option value="Fail" <%= selectedStatus === 'Fail' ? 'selected' : '' %>>Failed Only</option>
+                                <option value="Pending" <%= selectedStatus === 'Pending' ? 'selected' : '' %>>Pending</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Filter by Class</label>
+                            <select class="form-select" name="classId" onchange="this.form.submit()">
+                                <option value="">All Classes</option>
+                                <% classes.forEach(cls => { %>
+                                    <option value="<%= cls._id %>" <%= selectedClass === cls._id ? 'selected' : '' %>>
+                                        <%= cls.className %> (<%= cls.classCode %>)
+                                    </option>
+                                <% }); %>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Search Student</label>
+                            <input type="text" class="form-control" placeholder="Search by name..." id="searchResults">
+                        </div>
+                        <div class="col-md-3">
+                            <button type="button" class="btn btn-outline-secondary" onclick="clearFilters()">
+                                <i class="bi bi-x-circle me-1"></i>
+                                Clear Filters
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Results Stats -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h3><%= stats.total %></h3>
+                                    <p class="mb-0">Total Results</p>
+                                </div>
+                                <i class="bi bi-file-earmark-text fs-1 opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h3><%= stats.passed %></h3>
+                                    <p class="mb-0">Passed</p>
+                                </div>
+                                <i class="bi bi-check-circle fs-1 opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-danger text-white">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h3><%= stats.failed %></h3>
+                                    <p class="mb-0">Failed</p>
+                                </div>
+                                <i class="bi bi-x-circle fs-1 opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h3><%= stats.avgPercentage %>%</h3>
+                                    <p class="mb-0">Average</p>
+                                </div>
+                                <i class="bi bi-percent fs-1 opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Results Table -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h5 class="mb-0">
+                                <i class="bi bi-table me-2"></i>
+                                Student Results
+                                <span class="badge bg-secondary ms-2"><%= results.length %></span>
+                            </h5>
+                        </div>
+                        <div class="col-auto">
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" onclick="sortResults('name')">
+                                    <i class="bi bi-sort-alpha-down me-1"></i>Name
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="sortResults('percentage')">
+                                    <i class="bi bi-sort-numeric-down me-1"></i>Score
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="sortResults('class')">
+                                    <i class="bi bi-book me-1"></i>Class
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="resultsTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="40">#</th>
+                                    <th>Student</th>
+                                    <th>Class</th>
+                                    <th width="80">CIA<br><small>/40</small></th>
+                                    <th width="80">ESE<br><small>/50</small></th>
+                                    <th width="80">Practical<br><small>/10</small></th>
+                                    <th width="80">Total<br><small>/100</small></th>
+                                    <th width="80">Grade</th>
+                                    <th width="80">Status</th>
+                                    <th width="100">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (results && results.length > 0) { %>
+                                    <% results.forEach((result, index) => { %>
+                                        <tr class="result-row <%= result.status === 'Fail' ? 'table-danger-subtle' : result.status === 'Pass' ? 'table-success-subtle' : '' %>">
+                                            <td><%= index + 1 %></td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="<%= result.studentId.profileImage || '/images/default-avatar.png'%>" 
+                                                         alt="Avatar" width="35" height="35" class="rounded-circle me-2">
+                                                    <div>
+                                                        <h6 class="mb-0"><%= result.studentId.firstName %> <%= result.studentId.lastName %></h6>
+                                                        <small class="text-muted"><%= result.studentId.email %></small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <small class="fw-bold"><%= result.classId.className %></small><br>
+                                                    <small class="text-muted"><%= result.classId.classCode %></small>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="score-badge <%= result.ciaTotal >= 20 ? 'bg-success' : result.ciaTotal >= 16 ? 'bg-warning' : 'bg-danger' %> text-white">
+                                                    <%= result.ciaTotal || 0 %>
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="score-badge <%= result.eseTotal >= 25 ? 'bg-success' : result.eseTotal >= 20 ? 'bg-warning' : 'bg-danger' %> text-white">
+                                                    <%= result.eseTotal || 0 %>
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="score-badge <%= result.practicalTotal >= 5 ? 'bg-success' : result.practicalTotal >= 4 ? 'bg-warning' : 'bg-danger' %> text-white">
+                                                    <%= result.practicalTotal || 0 %>
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <strong class="fs-6"><%= result.totalMarks || 0 %></strong>
+                                                <br>
+                                                <small class="text-muted">(<%= result.percentage || 0 %>%)</small>
+                                            </td>
+                                            <td class="text-center">
+                                                <% if (result.letterGrade) { %>
+                                                    <span class="grade-badge grade-<%= result.letterGrade.replace('+', 'plus') %>">
+                                                        <%= result.letterGrade %>
+                                                    </span>
+                                                <% } else { %>
+                                                    <span class="badge bg-secondary">-</span>
+                                                <% } %>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-<%= result.status === 'Pass' ? 'success' : result.status === 'Fail' ? 'danger' : 'secondary' %>">
+                                                    <%= result.status || 'Pending' %>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <button class="btn btn-outline-info" 
+                                                            onclick="viewResultDetails('<%= result._id %>')" 
+                                                            title="View Details">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-primary" 
+                                                            onclick="downloadResult('<%= result._id %>')" 
+                                                            title="Download">
+                                                        <i class="bi bi-download"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <% }); %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="10" class="text-center py-4">
+                                            <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
+                                            <h6 class="text-muted mt-2">No results found</h6>
+                                            <p class="text-muted">Try adjusting your filters or search criteria.</p>
+                                        </td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <% if (results && results.length > 0) { %>
+                    <div class="card-footer">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <small class="text-muted">
+                                    Showing <%= results.length %> results • 
+                                    Pass rate: <%= stats.total > 0 ? Math.round((stats.passed / stats.total) * 100) : 0 %>%
+                                </small>
+                            </div>
+                            <div class="col-auto">
+                                <button class="btn btn-success btn-sm" onclick="exportFilteredResults()">
+                                    <i class="bi bi-download me-1"></i>
+                                    Export Filtered
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+            
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function sortResults(criteria) {
+            const table = document.getElementById('resultsTable');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('.result-row'));
+            
+            rows.sort((a, b) => {
+                switch (criteria) {
+                    case 'name':
+                        const nameA = a.querySelector('h6').textContent.trim();
+                        const nameB = b.querySelector('h6').textContent.trim();
+                        return nameA.localeCompare(nameB);
+                        
+                    case 'percentage':
+                        const scoreA = parseInt(a.querySelector('strong').textContent) || 0;
+                        const scoreB = parseInt(b.querySelector('strong').textContent) || 0;
+                        return scoreB - scoreA;
+                        
+                    case 'class':
+                        const classA = a.querySelectorAll('td')[2].textContent.trim();
+                        const classB = b.querySelectorAll('td')[2].textContent.trim();
+                        return classA.localeCompare(classB);
+                        
+                    default:
+                        return 0;
+                }
+            });
+            
+            // Re-append sorted rows and update numbers
+            rows.forEach((row, index) => {
+                row.querySelector('td:first-child').textContent = index + 1;
+                tbody.appendChild(row);
+            });
+            
+            showToast(`Sorted by ${criteria}`, 'info');
+        }
+        
+        function clearFilters() {
+            window.location.href = '/admin/results';
+        }
+        
+        function viewResultDetails(resultId) {
+            alert('View result details - Feature coming soon!');
+        }
+        
+        function downloadResult(resultId) {
+            alert('Download individual result - Feature coming soon!');
+        }
+        
+        function exportAllResults() {
+            alert('Export all results - Feature coming soon!');
+        }
+        
+        function exportFilteredResults() {
+            alert('Export filtered results - Feature coming soon!');
+        }
+        
+        function confirmLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/auth/logout';
+            }
+        }
+        
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            toast.style.cssText = `
+                top: 80px;
+                right: 20px;
+                z-index: 9999;
+                min-width: 300px;
+                box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            `;
+            
+            toast.innerHTML = `
+                <i class="bi bi-info-circle me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                const bsAlert = new bootstrap.Alert(toast);
+                bsAlert.close();
+            }, 3000);
+        }
+        
+        // Search functionality
+        document.getElementById('searchResults')?.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('.result-row');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+        
+        document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('show');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/dashboard.css" rel="stylesheet">
+</head>
+<body class="dashboard-body">
+    
+<!-- Top Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <div class="d-flex align-items-center">
+            <button class="btn btn-outline-light d-lg-none me-2" type="button" id="sidebarToggle">
+                <i class="bi bi-list"></i>
+            </button>
+            <a class="navbar-brand d-flex align-items-center" href="/admin/dashboard">
+                <i class="bi bi-shield-check me-2 text-warning" style="font-size: 1.5rem;"></i>
+                <span class="fw-bold">Admin Portal</span>
+            </a>
+        </div>
+        
+        <!-- User Menu -->
+        <div class="dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center text-white" 
+               href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                <img src="<%= user.profileImage || '/images/default-avatar.png' %>" 
+                     alt="Avatar" width="32" height="32" class="rounded-circle me-2">
+                <span class="d-none d-sm-inline">
+                    <%= user.firstName %> <%= user.lastName %>
+                </span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <div class="dropdown-header">
+                        <strong><%= user.firstName %> <%= user.lastName %></strong><br>
+                        <small class="text-muted"><%= user.email %></small><br>
+                        <span class="badge bg-danger">Admin</span>
+                    </div>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="/admin/settings">
+                    <i class="bi bi-gear me-2"></i>Settings
+                </a></li>
+                <li><a class="dropdown-item" href="#" onclick="confirmLogout()">
+                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                </a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar" style="background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);">
+    <div class="sidebar-header">
+        <h5 class="text-white mb-0">Admin Panel</h5>
+        <small class="text-white-50">System Management</small>
+    </div>
+    
+    <ul class="sidebar-nav">
+        <li class="nav-item">
+            <a class="nav-link <%= currentPage === 'dashboard' ? 'active' : '' %>" href="/admin/dashboard">
+                <i class="bi bi-speedometer2"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link <%= currentPage === 'faculty' ? 'active' : '' %>" href="/admin/faculty">
+                <i class="bi bi-person-badge"></i>
+                <span>Faculty Management</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link <%= currentPage === 'students' ? 'active' : '' %>" href="/admin/students">
+                <i class="bi bi-people"></i>
+                <span>Student Management</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link <%= currentPage === 'classes' ? 'active' : '' %>" href="/admin/classes">
+                <i class="bi bi-book"></i>
+                <span>Class Management</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link <%= currentPage === 'results' ? 'active' : '' %>" href="/admin/results">
+                <i class="bi bi-bar-chart-line"></i>
+                <span>Results Monitoring</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link <%= currentPage === 'attendance' ? 'active' : '' %>" href="/admin/attendance">
+                <i class="bi bi-clipboard-check"></i>
+                <span>Attendance Tracking</span>
+            </a>
+        </li>
+    </ul>
+</div>
+    
+    <div class="main-content">
+        <div class="content-wrapper">
+            
+            <div class="page-header">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h1 class="page-title">
+                            <i class="bi bi-book me-2"></i>
+                            Class Management
+                        </h1>
+                        <p class="page-subtitle">Create and manage classes</p>
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addClassModal">
+                            <i class="bi bi-plus-circle me-2"></i>
+                            Create Class
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Class Stats -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <h4><%= classes.length %></h4>
+                            <p class="mb-0">Total Classes</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <h4><%= classes.filter(c => c.isActive).length %></h4>
+                            <p class="mb-0">Active Classes</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <h4><%= faculty.length %></h4>
+                            <p class="mb-0">Available Faculty</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <% const totalStudents = classes.reduce((sum, c) => sum + (c.studentIds ? c.studentIds.length : 0), 0); %>
+                            <h4><%= totalStudents %></h4>
+                            <p class="mb-0">Total Enrollments</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Classes List -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h5 class="mb-0">Class Records</h5>
+                        </div>
+                        <div class="col-auto">
+                            <div class="input-group input-group-sm">
+                                <input type="text" class="form-control" placeholder="Search classes..." id="searchClasses">
+                                <button class="btn btn-outline-secondary" type="button">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Class Details</th>
+                                    <th>Faculty</th>
+                                    <th>Students</th>
+                                    <th>Schedule</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% classes.forEach((cls, index) => { %>
+                                    <tr>
+                                        <td><%= index + 1 %></td>
+                                        <td>
+                                            <div>
+                                                <h6 class="mb-1"><%= cls.className %></h6>
+                                                <small class="text-muted">
+                                                    <%= cls.subject %> • <%= cls.classCode %><br>
+                                                    Sem <%= cls.semester %> • Year <%= cls.year %>
+                                                </small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <% if (cls.facultyId) { %>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="<%= cls.facultyId.profileImage || '/images/default-avatar.png' %>" 
+                                                         alt="Avatar" width="30" height="30" class="rounded-circle me-2">
+                                                    <div>
+                                                        <small><%= cls.facultyId.firstName %> <%= cls.facultyId.lastName %></small>
+                                                    </div>
+                                                </div>
+                                            <% } else { %>
+                                                <span class="badge bg-secondary">No Faculty</span>
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">
+                                                <%= cls.studentIds ? cls.studentIds.length : 0 %> Students
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                <%= cls.schedule || 'Not set' %>
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-<%= cls.isActive ? 'success' : 'danger' %>">
+                                                <%= cls.isActive ? 'Active' : 'Inactive' %>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-info" 
+                                                        onclick="viewClass('<%= cls._id %>')" 
+                                                        title="View Details">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                                <button class="btn btn-outline-primary" 
+                                                        onclick="assignFaculty('<%= cls._id %>')" 
+                                                        title="Assign Faculty">
+                                                    <i class="bi bi-person-badge"></i>
+                                                </button>
+                                                <button class="btn btn-outline-warning" 
+                                                        onclick="editClass('<%= cls._id %>')" 
+                                                        title="Edit">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button class="btn btn-outline-<%= cls.isActive ? 'danger' : 'success' %>" 
+                                                        onclick="toggleClassStatus('<%= cls._id %>', <%= cls.isActive %>)" 
+                                                        title="<%= cls.isActive ? 'Deactivate' : 'Activate' %>">
+                                                    <i class="bi bi-<%= cls.isActive ? 'x-circle' : 'check-circle' %>"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    
+    <!-- Add Class Modal -->
+    <div class="modal fade" id="addClassModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Create New Class
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="addClassForm">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="className" required>
+                                    <label for="className">Class Name</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="classCode" required>
+                                    <label for="classCode">Class Code</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="subject" required>
+                                    <label for="subject">Subject</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <select class="form-select" id="facultyId">
+                                        <option value="">Select Faculty...</option>
+                                        <% faculty.forEach(f => { %>
+                                            <option value="<%= f._id %>">
+                                                <%= f.firstName %> <%= f.lastName %>
+                                            </option>
+                                        <% }); %>
+                                    </select>
+                                    <label for="facultyId">Assign Faculty</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-floating mb-3">
+                                    <select class="form-select" id="semester" required>
+                                        <option value="">Select...</option>
+                                        <% for (let i = 1; i <= 8; i++) { %>
+                                            <option value="<%= i %>"><%= i %></option>
+                                        <% } %>
+                                    </select>
+                                    <label for="semester">Semester</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating mb-3">
+                                    <select class="form-select" id="year" required>
+                                        <option value="">Select...</option>
+                                        <% const currentYear = new Date().getFullYear(); %>
+                                        <% for (let i = currentYear; i <= currentYear + 5; i++) { %>
+                                            <option value="<%= i %>"><%= i %></option>
+                                        <% } %>
+                                    </select>
+                                    <label for="year">Academic Year</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating mb-3">
+                                    <input type="number" class="form-control" id="maxStudents" min="1" max="100" value="50">
+                                    <label for="maxStudents">Max Students</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="schedule" placeholder="e.g., Mon-Wed-Fri 10:00-11:30">
+                            <label for="schedule">Schedule (Optional)</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <textarea class="form-control" id="description" style="height: 80px"></textarea>
+                            <label for="description">Description (Optional)</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-2"></i>
+                            Create Class
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Add Class Form Submission
+        document.getElementById('addClassForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const data = {
+                className: document.getElementById('className').value,
+                classCode: document.getElementById('classCode').value,
+                subject: document.getElementById('subject').value,
+                facultyId: document.getElementById('facultyId').value || null,
+                semester: document.getElementById('semester').value,
+                year: document.getElementById('year').value,
+                maxStudents: document.getElementById('maxStudents').value,
+                schedule: document.getElementById('schedule').value,
+                description: document.getElementById('description').value
+            };
+            
+            try {
+                const response = await fetch('/api/admin/class/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('Class created successfully!', 'success');
+                    document.getElementById('addClassModal').querySelector('[data-bs-dismiss="modal"]').click();
+                    setTimeout(() => window.location.reload(), 2000);
+                } else {
+                    showToast(result.message || 'Failed to create class', 'danger');
+                }
+            } catch (error) {
+                showToast('Error creating class', 'danger');
+            }
+        });
+
+        // Toggle Class Status
+        async function toggleClassStatus(classId, isActive) {
+            const action = isActive ? 'deactivate' : 'activate';
+            if (!confirm(`Are you sure you want to ${action} this class?`)) return;
+            
+            try {
+                const response = await fetch('/api/admin/class/toggle-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ classId, isActive })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showToast(result.message || 'Failed to update status', 'danger');
+                }
+            } catch (error) {
+                showToast('Error updating class status', 'danger');
+            }
+        }
+
+        // Placeholder functions for future features
+        function viewClass(classId) {
+            showToast('View class details - Feature coming soon!', 'info');
+        }
+        
+        function assignFaculty(classId) {
+            showToast('Faculty assignment feature coming soon!', 'info');
+        }
+        
+        function editClass(classId) {
+            showToast('Edit class - Feature coming soon!', 'info');
+        }
+
+        // Logout function
+        function confirmLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/auth/logout';
+            }
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            toast.style.cssText = `
+                top: 80px;
+                right: 20px;
+                z-index: 9999;
+                min-width: 300px;
+                box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            `;
+            
+            const iconMap = {
+                success: 'bi-check-circle',
+                danger: 'bi-exclamation-triangle',
+                warning: 'bi-exclamation-triangle',
+                info: 'bi-info-circle'
+            };
+            
+            toast.innerHTML = `
+                <i class="bi ${iconMap[type] || 'bi-info-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                const bsAlert = new bootstrap.Alert(toast);
+                bsAlert.close();
+            }, type === 'success' ? 4000 : 3000);
+        }
+
+        // Search functionality
+        document.getElementById('searchClasses')?.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+        
+        document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('show');
+        });
+    </script>
+</body>
+</html>

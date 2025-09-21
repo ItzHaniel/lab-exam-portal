@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="/css/style.css" rel="stylesheet">
+    
+    <!-- reCAPTCHA -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+<body class="login-page">
+    
+    <div class="container-fluid h-100">
+        <div class="row h-100">
+            
+            <!-- Left Side - Login Form (MADE NARROWER) -->
+            <div class="col-lg-4 col-md-5 login-form-section d-flex align-items-center justify-content-center">
+                <div class="login-form-container p-4 w-100" style="max-width: 420px;">
+                    
+                    <!-- Logo and Title -->
+                    <div class="text-center mb-4">
+                        <div class="logo-container mb-3">
+                            <img src="/images/logo.png" 
+                                alt="Lab Exam Portal Logo" 
+                                class="logo-image"
+                                style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">
+                        </div>
+                        <h4 class="mb-2">Lab Exam Portal</h4>
+                        <p class="text-muted small">Secure access to your examination system</p>
+                    </div>
+                    
+                    <!-- Error/Success Messages -->
+                    <% if (error) { %>
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <%= error %>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    <% } %>
+                    
+                    <% if (success) { %>
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle me-2"></i>
+                            <%= success %>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    <% } %>
+                    
+                    <!-- Login Form -->
+                    <form id="loginForm" action="/auth/login" method="POST" class="needs-validation" novalidate>
+                        
+                        <!-- Username/Email Input -->
+                        <div class="form-floating mb-3">
+                            <input type="text" 
+                                class="form-control rounded-pill" 
+                                id="username" 
+                                name="username" 
+                                placeholder="Enter your UID..." 
+                                required>
+                            <label for="username">
+                                <i class="bi bi-person me-2"></i>Enter your UID...
+                            </label>
+                            <div class="invalid-feedback">
+                                Please enter your username or email.
+                            </div>
+                        </div>
+                        
+                        <!-- Password Input -->
+                        <div class="form-floating mb-3 position-relative">
+                            <input type="password" 
+                                class="form-control rounded-pill" 
+                                id="password" 
+                                name="password" 
+                                placeholder="Enter your Password..." 
+                                required>
+                            <label for="password">
+                                <i class="bi bi-lock me-2"></i>Enter your Password...
+                            </label>
+                            <button type="button" 
+                                    class="btn btn-link position-absolute top-50 end-0 translate-middle-y me-3 p-0" 
+                                    id="togglePassword" 
+                                    style="z-index: 10;">
+                                <small class="text-muted">Show</small>
+                            </button>
+                            <div class="invalid-feedback">
+                                Please enter your password.
+                            </div>
+                        </div>
+                        
+                        <!-- Role Selection -->
+                        <div class="form-floating mb-3">
+                            <select class="form-select rounded-pill" 
+                                    id="role" 
+                                    name="role" 
+                                    required>
+                                <option value="">Select Role</option>
+                                <option value="Student">Student</option>
+                                <option value="Faculty">Faculty</option>
+                                <option value="Admin">Admin</option>
+                            </select>
+                            <label for="role">
+                                <i class="bi bi-person-badge me-2"></i>Select Role
+                            </label>
+                            <div class="invalid-feedback">
+                                Please select your role.
+                            </div>
+                        </div>
+                        
+                        <!-- CAPTCHA - IMPROVED LAYOUT -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark mb-2">
+                                <i class="bi bi-shield-check me-2"></i>Enter CAPTCHA
+                            </label>
+                            <div class="captcha-container p-3 border rounded-3 bg-light">
+                                <div class="row align-items-center g-2">
+                                    <div class="col-4">
+                                        <div class="captcha-code bg-white p-2 rounded border text-center fw-bold" id="captchaCode">
+                                            <!-- Generated by JS -->
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="text" 
+                                            class="form-control rounded-pill" 
+                                            id="captchaInput" 
+                                            name="captcha" 
+                                            placeholder="Enter code..." 
+                                            required 
+                                            autocomplete="off">
+                                        <div class="invalid-feedback">
+                                            Please enter the correct CAPTCHA.
+                                        </div>
+                                    </div>
+                                    <div class="col-2">
+                                        <button type="button" 
+                                                class="btn btn-outline-primary btn-sm w-100 rounded-pill" 
+                                                id="refreshCaptcha"
+                                                title="Refresh">
+                                            <i class="bi bi-arrow-clockwise"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Forgot Password -->
+                        <div class="text-center mb-3">
+                            <a href="#" class="text-decoration-none text-primary small">
+                                Forgot Password?
+                            </a>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <button type="submit" 
+                                class="btn btn-primary w-100 rounded-pill py-3 fw-bold" 
+                                id="loginBtn">
+                            <span class="spinner-border spinner-border-sm d-none me-2" id="loginSpinner"></span>
+                            <i class="bi bi-box-arrow-in-right me-2"></i>
+                            Login
+                        </button>
+                        
+                    </form>
+                    
+                    <!-- Testing Notice -->
+                    <div class="mt-4 text-center">
+                        <p class="text-muted small mb-2">Secure • Frontend demo only</p>
+                        <!-- For Testing Only - Remove in Production -->
+                        <div class="testing-notice">
+                            <small class="text-info">For testing purposes:</small><br>
+                            <a href="/auth/signup" class="btn btn-outline-success btn-sm mt-2">
+                                <i class="bi bi-person-plus me-1"></i>Create Test Account
+                            </a>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <!-- Right Side - Lab Image Background (MADE WIDER) -->
+            <div class="col-lg-8 col-md-7 d-none d-md-block lab-image-section">
+                <div class="lab-image-overlay">
+                    <div class="lab-content">
+                        <div class="lab-info">
+                            <h3 class="text-white mb-3">Lab Sessions • Practical Exams • Schedules</h3>
+                            <p class="text-white-50">Access your laboratory examinations and practical assessments through our secure portal</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="/js/main.js"></script>
+    
+</body>
+</html>

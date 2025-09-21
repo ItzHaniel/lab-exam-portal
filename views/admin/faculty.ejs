@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/dashboard.css" rel="stylesheet">
+</head>
+<body class="dashboard-body">
+    
+<!-- Top Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <div class="d-flex align-items-center">
+            <button class="btn btn-outline-light d-lg-none me-2" type="button" id="sidebarToggle">
+                <i class="bi bi-list"></i>
+            </button>
+            <a class="navbar-brand d-flex align-items-center" href="/admin/dashboard">
+                <i class="bi bi-shield-check me-2 text-warning" style="font-size: 1.5rem;"></i>
+                <span class="fw-bold">Admin Portal</span>
+            </a>
+        </div>
+        
+        <!-- User Menu -->
+        <div class="dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center text-white" 
+               href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                <img src="<%= user.profileImage || '/images/default-avatar.png' %>" 
+                     alt="Avatar" width="32" height="32" class="rounded-circle me-2">
+                <span class="d-none d-sm-inline">
+                    <%= user.firstName %> <%= user.lastName %>
+                </span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <div class="dropdown-header">
+                        <strong><%= user.firstName %> <%= user.lastName %></strong><br>
+                        <small class="text-muted"><%= user.email %></small><br>
+                        <span class="badge bg-danger">Admin</span>
+                    </div>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="/admin/settings">
+                    <i class="bi bi-gear me-2"></i>Settings
+                </a></li>
+                <li><a class="dropdown-item" href="#" onclick="confirmLogout()">
+                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                </a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar" style="background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);">
+    <div class="sidebar-header">
+        <h5 class="text-white mb-0">Admin Panel</h5>
+        <small class="text-white-50">System Management</small>
+    </div>
+    
+    <ul class="sidebar-nav">
+        <li class="nav-item">
+            <a class="nav-link <%= currentPage === 'dashboard' ? 'active' : '' %>" href="/admin/dashboard">
+                <i class="bi bi-speedometer2"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link <%= currentPage === 'faculty' ? 'active' : '' %>" href="/admin/faculty">
+                <i class="bi bi-person-badge"></i>
+                <span>Faculty Management</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link <%= currentPage === 'students' ? 'active' : '' %>" href="/admin/students">
+                <i class="bi bi-people"></i>
+                <span>Student Management</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link <%= currentPage === 'classes' ? 'active' : '' %>" href="/admin/classes">
+                <i class="bi bi-book"></i>
+                <span>Class Management</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link <%= currentPage === 'results' ? 'active' : '' %>" href="/admin/results">
+                <i class="bi bi-bar-chart-line"></i>
+                <span>Results Monitoring</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link <%= currentPage === 'attendance' ? 'active' : '' %>" href="/admin/attendance">
+                <i class="bi bi-clipboard-check"></i>
+                <span>Attendance Tracking</span>
+            </a>
+        </li>
+    </ul>
+</div>
+    
+    <div class="main-content">
+        <div class="content-wrapper">
+            
+            <div class="page-header">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h1 class="page-title">
+                            <i class="bi bi-person-badge me-2"></i>
+                            Faculty Management
+                        </h1>
+                        <p class="page-subtitle">Add, remove, and manage faculty members</p>
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFacultyModal">
+                            <i class="bi bi-person-plus me-2"></i>
+                            Add Faculty
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Faculty Stats -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h4><%= faculty.length %></h4>
+                                    <p class="mb-0">Total Faculty</p>
+                                </div>
+                                <i class="bi bi-people fs-1 opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h4><%= faculty.filter(f => f.isActive).length %></h4>
+                                    <p class="mb-0">Active Faculty</p>
+                                </div>
+                                <i class="bi bi-check-circle fs-1 opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h4><%= classes.length %></h4>
+                                    <p class="mb-0">Available Classes</p>
+                                </div>
+                                <i class="bi bi-book fs-1 opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h4><%= faculty.filter(f => !f.isActive).length %></h4>
+                                    <p class="mb-0">Inactive Faculty</p>
+                                </div>
+                                <i class="bi bi-x-circle fs-1 opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Faculty List -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h5 class="mb-0">Faculty Members</h5>
+                        </div>
+                        <div class="col-auto">
+                            <div class="input-group input-group-sm">
+                                <input type="text" class="form-control" placeholder="Search faculty..." id="searchFaculty">
+                                <button class="btn btn-outline-secondary" type="button">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Faculty Details</th>
+                                    <th>Contact</th>
+                                    <th>Classes Assigned</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% faculty.forEach((member, index) => { %>
+                                    <tr>
+                                        <td><%= index + 1 %></td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="<%= member.profileImage || '/images/default-avatar.png' %>" 
+                                                     alt="Avatar" width="40" height="40" class="rounded-circle me-3">
+                                                <div>
+                                                    <h6 class="mb-1"><%= member.firstName %> <%= member.lastName %></h6>
+                                                    <small class="text-muted">Faculty ID: <%= member._id.toString().slice(-6) %></small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <div><%= member.email %></div>
+                                                <small class="text-muted"><%= member.phone || 'Not provided' %></small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <% const assignedClasses = classes.filter(c => c.facultyId && c.facultyId.toString() === member._id.toString()); %>
+                                            <% if (assignedClasses.length > 0) { %>
+                                                <span class="badge bg-info"><%= assignedClasses.length %> Classes</span>
+                                            <% } else { %>
+                                                <span class="badge bg-secondary">No Classes</span>
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-<%= member.isActive ? 'success' : 'danger' %>">
+                                                <%= member.isActive ? 'Active' : 'Inactive' %>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-primary" 
+                                                        onclick="assignClasses('<%= member._id %>', '<%= member.firstName %> <%= member.lastName %>')" 
+                                                        title="Assign Classes">
+                                                    <i class="bi bi-book-half"></i>
+                                                </button>
+                                                <button class="btn btn-outline-warning" 
+                                                        onclick="editFaculty('<%= member._id %>')" 
+                                                        title="Edit">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button class="btn btn-outline-<%= member.isActive ? 'danger' : 'success' %>" 
+                                                        onclick="toggleFacultyStatus('<%= member._id %>', <%= member.isActive %>)" 
+                                                        title="<%= member.isActive ? 'Deactivate' : 'Activate' %>">
+                                                    <i class="bi bi-<%= member.isActive ? 'x-circle' : 'check-circle' %>"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    
+    <!-- Add Faculty Modal -->
+    <div class="modal fade" id="addFacultyModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-person-plus me-2"></i>
+                        Add New Faculty
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="addFacultyForm">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="firstName" name="firstName" required>
+                                    <label for="firstName">First Name</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="lastName" name="lastName" required>
+                                    <label for="lastName">Last Name</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="email" class="form-control" id="email" name="email" required>
+                            <label for="email">Email Address</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="tel" class="form-control" id="phone" name="phone">
+                            <label for="phone">Phone Number (Optional)</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <label for="password">Temporary Password</label>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            The faculty member will receive login credentials via email.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-person-plus me-2"></i>
+                            Add Faculty
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Add Faculty Form Submission
+        document.getElementById('addFacultyForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {
+                firstName: formData.get('firstName'),
+                lastName: formData.get('lastName'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                password: formData.get('password')
+            };
+            
+            try {
+                const response = await fetch('/api/admin/faculty/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('Faculty added successfully!', 'success');
+                    document.getElementById('addFacultyModal').querySelector('[data-bs-dismiss="modal"]').click();
+                    setTimeout(() => window.location.reload(), 2000);
+                } else {
+                    showToast(result.message || 'Failed to add faculty', 'danger');
+                }
+            } catch (error) {
+                showToast('Error adding faculty', 'danger');
+            }
+        });
+
+        // Toggle Faculty Status
+        async function toggleFacultyStatus(facultyId, isActive) {
+            const action = isActive ? 'deactivate' : 'activate';
+            if (!confirm(`Are you sure you want to ${action} this faculty member?`)) return;
+            
+            try {
+                const response = await fetch('/api/admin/faculty/toggle-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ facultyId, isActive })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showToast(result.message || 'Failed to update status', 'danger');
+                }
+            } catch (error) {
+                showToast('Error updating faculty status', 'danger');
+            }
+        }
+
+        // Assign Classes (placeholder for now)
+        function assignClasses(facultyId, facultyName) {
+            showToast('Class assignment feature coming soon!', 'info');
+        }
+
+        // Edit Faculty (placeholder for now)  
+        function editFaculty(facultyId) {
+            showToast('Faculty editing feature coming soon!', 'info');
+        }
+
+        // Logout function
+        function confirmLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/auth/logout';
+            }
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            toast.style.cssText = `
+                top: 80px;
+                right: 20px;
+                z-index: 9999;
+                min-width: 300px;
+                box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            `;
+            
+            const iconMap = {
+                success: 'bi-check-circle',
+                danger: 'bi-exclamation-triangle',
+                warning: 'bi-exclamation-triangle',
+                info: 'bi-info-circle'
+            };
+            
+            toast.innerHTML = `
+                <i class="bi ${iconMap[type] || 'bi-info-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                const bsAlert = new bootstrap.Alert(toast);
+                bsAlert.close();
+            }, type === 'success' ? 4000 : 3000);
+        }
+
+        // Search functionality
+        document.getElementById('searchFaculty')?.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+        
+        document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('show');
+        });
+    </script>
+</body>
+</html>

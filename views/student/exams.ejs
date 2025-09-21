@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/dashboard.css" rel="stylesheet">
+</head>
+<body class="dashboard-body">
+    
+    <!-- Top Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary-custom fixed-top">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center">
+                <button class="btn btn-outline-light d-lg-none me-2" type="button" id="sidebarToggle">
+                    <i class="bi bi-list"></i>
+                </button>
+                <a class="navbar-brand d-flex align-items-center" href="/student/dashboard">
+                    <img src="/images/logo.png" alt="Logo" width="32" height="32" class="rounded-circle me-2">
+                    <span class="fw-bold">Lab Exam Portal</span>
+                </a>
+            </div>
+            
+            <div class="dropdown">
+                <a class="nav-link dropdown-toggle d-flex align-items-center text-white" 
+                   href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                    <img src="<%= user.profileImage || '/images/default-avatar.png' %>" 
+                        alt="Avatar" width="32" height="32" class="rounded-circle me-2" id="navbarAvatar">
+                    <span class="d-none d-sm-inline">
+                        <%= user.firstName %> <%= user.lastName %>
+                    </span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <div class="dropdown-header">
+                            <strong><%= user.firstName %> <%= user.lastName %></strong><br>
+                            <small class="text-muted"><%= user.email %></small><br>
+                            <span class="badge bg-primary"><%= user.role %></span>
+                        </div>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="/student/settings">
+                        <i class="bi bi-gear me-2"></i>Settings
+                    </a></li>
+                    <li><a class="dropdown-item" href="#" onclick="confirmLogout()">
+                        <i class="bi bi-box-arrow-right me-2"></i>Logout
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h5 class="text-white mb-0">Student Portal</h5>
+            <small class="text-white-50">Academic Dashboard</small>
+        </div>
+        
+        <ul class="sidebar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="/student/dashboard">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/student/classes">
+                    <i class="bi bi-book"></i>
+                    <span>My Classes</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="/student/exams">
+                    <i class="bi bi-calendar-event"></i>
+                    <span>Upcoming Exams</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/student/results">
+                    <i class="bi bi-bar-chart"></i>
+                    <span>Latest Results</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/student/faculties">
+                    <i class="bi bi-people"></i>
+                    <span>Faculty Contacts</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="content-wrapper">
+            
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h1 class="page-title">
+                            <i class="bi bi-calendar-event me-2"></i>
+                            Upcoming Exams
+                        </h1>
+                        <p class="page-subtitle">View your scheduled examinations and assignments</p>
+                    </div>
+                    <div class="col-auto">
+                        <div class="d-flex gap-2">
+                            <div class="badge bg-warning fs-6">
+                                <i class="bi bi-clock me-1"></i>
+                                <%= upcomingExams.length %> Upcoming
+                            </div>
+                            <div class="badge bg-secondary fs-6">
+                                <i class="bi bi-check-circle me-1"></i>
+                                <%= pastExams.length %> Completed
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- View Toggle -->
+            <div class="mb-4">
+                <div class="card card-custom">
+                    <div class="card-body py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="view-toggle-buttons btn-group" role="group">
+                                <input type="radio" class="btn-check" name="viewType" id="upcomingView" checked>
+                                <label class="btn btn-outline-primary" for="upcomingView">
+                                    <i class="bi bi-calendar-plus me-2"></i>
+                                    Upcoming Exams
+                                </label>
+                                
+                                <input type="radio" class="btn-check" name="viewType" id="pastView">
+                                <label class="btn btn-outline-secondary" for="pastView">
+                                    <i class="bi bi-calendar-check me-2"></i>
+                                    Past Exams
+                                </label>
+                            </div>
+                            
+                            <div class="view-options">
+                                <button class="btn btn-sm btn-outline-info" id="calendarViewBtn">
+                                    <i class="bi bi-calendar3 me-1"></i>
+                                    Calendar View
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Upcoming Exams Section -->
+            <div id="upcomingExamsSection">
+                <% if (upcomingExams.length > 0) { %>
+                    <div class="row">
+                        <% upcomingExams.forEach(exam => { %>
+                            <div class="col-lg-6 mb-4">
+                                <div class="card card-custom exam-card exam-upcoming">
+                                    
+                                    <!-- Exam Header -->
+                                    <div class="card-header exam-header">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h5 class="exam-title mb-1">
+                                                    <%= exam.title %>
+                                                </h5>
+                                                <div class="exam-meta">
+                                                    <span class="exam-class">
+                                                        <%= exam.classId.className %>
+                                                    </span>
+                                                    <span class="class-code">
+                                                        (<%= exam.classId.classCode %>)
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="exam-type-badge">
+                                                <span class="badge bg-<%= exam.examType === 'ESE' ? 'danger' : exam.examType.includes('CIA') ? 'warning' : 'info' %>">
+                                                    <%= exam.examType %>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Exam Body -->
+                                    <div class="card-body">
+                                        
+                                        <!-- Date and Time -->
+                                        <div class="exam-datetime mb-3">
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <div class="datetime-item">
+                                                        <i class="bi bi-calendar3 text-primary me-2"></i>
+                                                        <div>
+                                                            <strong><%= moment(exam.scheduledDate).format('dddd, MMMM DD, YYYY') %></strong>
+                                                            <div class="time-remaining text-muted small">
+                                                                <%= exam.timeRemaining || moment(exam.scheduledDate).fromNow() %>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <div class="datetime-item">
+                                                        <i class="bi bi-clock text-info me-2"></i>
+                                                        <div>
+                                                            <strong><%= exam.startTime %> - <%= exam.endTime %></strong>
+                                                            <div class="duration text-muted small">
+                                                                Duration: <%= exam.duration %> minutes
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Venue and Marks -->
+                                        <div class="exam-details mb-3">
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <div class="detail-item">
+                                                        <i class="bi bi-geo-alt text-danger me-2"></i>
+                                                        <span class="detail-label">Venue:</span>
+                                                        <span class="detail-value"><%= exam.venue %></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <div class="detail-item">
+                                                        <i class="bi bi-award text-success me-2"></i>
+                                                        <span class="detail-label">Total Marks:</span>
+                                                        <span class="detail-value"><%= exam.totalMarks %></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Faculty -->
+                                        <div class="faculty-info mb-3">
+                                            <i class="bi bi-person-badge text-muted me-2"></i>
+                                            <span class="text-muted">Conducted by:</span>
+                                            <span class="faculty-name">
+                                                <%= exam.facultyId.firstName %> <%= exam.facultyId.lastName %>
+                                            </span>
+                                        </div>
+                                        
+                                        <!-- Description -->
+                                        <% if (exam.description) { %>
+                                            <div class="exam-description">
+                                                <h6 class="small text-uppercase text-muted mb-2">Description</h6>
+                                                <p class="text-muted small">
+                                                    <%= exam.description %>
+                                                </p>
+                                            </div>
+                                        <% } %>
+                                        
+                                        <!-- Instructions -->
+                                        <% if (exam.instructions) { %>
+                                            <div class="exam-instructions">
+                                                <h6 class="small text-uppercase text-warning mb-2">
+                                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                                    Instructions
+                                                </h6>
+                                                <div class="instructions-content">
+                                                    <%= exam.instructions %>
+                                                </div>
+                                            </div>
+                                        <% } %>
+                                        
+                                    </div>
+                                    
+                                    <!-- Exam Footer -->
+                                    <div class="card-footer bg-transparent">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="exam-countdown">
+                                                <% if (moment(exam.scheduledDate).diff(moment(), 'days') <= 7) { %>
+                                                    <span class="badge bg-danger">
+                                                        <i class="bi bi-alarm me-1"></i>
+                                                        Due Soon
+                                                    </span>
+                                                <% } else { %>
+                                                    <span class="text-muted small">
+                                                        <i class="bi bi-calendar-week me-1"></i>
+                                                        <%= moment(exam.scheduledDate).fromNow() %>
+                                                    </span>
+                                                <% } %>
+                                            </div>
+                                            
+                                            <div class="exam-actions">
+                                                <button class="btn btn-sm btn-outline-primary" 
+                                                        onclick="addToCalendar('<%= exam._id %>')">
+                                                    <i class="bi bi-calendar-plus me-1"></i>
+                                                    Add to Calendar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                <% } else { %>
+                    <!-- Empty State for Upcoming -->
+                    <div class="card card-custom text-center py-5">
+                        <div class="card-body">
+                            <i class="bi bi-calendar-x text-muted" style="font-size: 4rem;"></i>
+                            <h4 class="mt-4 text-muted">No Upcoming Exams</h4>
+                            <p class="text-muted">
+                                You don't have any scheduled examinations at the moment.<br>
+                                Check back later or contact your faculty for updates.
+                            </p>
+                            <a href="/student/classes" class="btn btn-primary">
+                                <i class="bi bi-book me-2"></i>
+                                View My Classes
+                            </a>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+            
+            <!-- Past Exams Section (Hidden by default) -->
+            <div id="pastExamsSection" style="display: none;">
+                <% if (pastExams.length > 0) { %>
+                    <div class="row">
+                        <% pastExams.forEach(exam => { %>
+                            <div class="col-lg-6 mb-4">
+                                <div class="card card-custom exam-card exam-past">
+                                    <div class="card-header exam-header">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="exam-title mb-1">
+                                                    <%= exam.title %>
+                                                </h6>
+                                                <small class="text-muted">
+                                                    <%= exam.classId.className %> (<%= exam.classId.classCode %>)
+                                                </small>
+                                            </div>
+                                            <span class="badge bg-secondary">
+                                                Completed
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <small class="text-muted">
+                                                    <i class="bi bi-calendar3 me-1"></i>
+                                                    <%= moment(exam.scheduledDate).format('MMM DD, YYYY') %>
+                                                </small>
+                                            </div>
+                                            <div>
+                                                <span class="badge bg-<%= exam.examType === 'ESE' ? 'danger' : exam.examType.includes('CIA') ? 'warning' : 'info' %>">
+                                                    <%= exam.examType %>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                <% } else { %>
+                    <div class="card card-custom text-center py-4">
+                        <div class="card-body">
+                            <i class="bi bi-calendar-check text-muted" style="font-size: 3rem;"></i>
+                            <h5 class="mt-3 text-muted">No Past Exams</h5>
+                            <p class="text-muted">Your completed examinations will appear here.</p>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+            
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/dashboard.js"></script>
+    
+    <script>
+        // Logout confirmation
+        function confirmLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/auth/logout';
+            }
+        }
+        
+        // Sidebar toggle
+        document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('show');
+        });
+        
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(e) {
+            const sidebar = document.getElementById('sidebar');
+            const toggle = document.getElementById('sidebarToggle');
+            
+            if (window.innerWidth < 992 && 
+                !sidebar.contains(e.target) && 
+                !toggle.contains(e.target)) {
+                sidebar.classList.remove('show');
+            }
+        });
+        
+        // View toggle functionality
+        document.getElementById('upcomingView').addEventListener('change', function() {
+            if (this.checked) {
+                document.getElementById('upcomingExamsSection').style.display = 'block';
+                document.getElementById('pastExamsSection').style.display = 'none';
+            }
+        });
+        
+        document.getElementById('pastView').addEventListener('change', function() {
+            if (this.checked) {
+                document.getElementById('upcomingExamsSection').style.display = 'none';
+                document.getElementById('pastExamsSection').style.display = 'block';
+            }
+        });
+        
+        // Add to calendar function
+        function addToCalendar(examId) {
+            alert('Add to Calendar feature will be implemented soon!');
+        }
+        
+        // Calendar view button
+        document.getElementById('calendarViewBtn').addEventListener('click', function() {
+            alert('Calendar view coming soon!');
+        });
+        
+        // Add hover effects to exam cards
+        document.querySelectorAll('.exam-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                if (!this.classList.contains('exam-past')) {
+                    this.style.transform = 'translateY(-3px)';
+                    this.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
+                }
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '';
+            });
+        });
+    </script>
+    
+</body>
+</html>

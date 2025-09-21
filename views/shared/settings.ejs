@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/dashboard.css" rel="stylesheet">
+</head>
+<body class="dashboard-body">
+    
+    <!-- Top Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary-custom fixed-top">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center">
+                <button class="btn btn-outline-light d-lg-none me-2" type="button" id="sidebarToggle">
+                    <i class="bi bi-list"></i>
+                </button>
+                <a class="navbar-brand d-flex align-items-center" href="/<%= user.role.toLowerCase() %>/dashboard">
+                    <img src="/images/logo.png" alt="Logo" width="32" height="32" class="rounded-circle me-2">
+                    <span class="fw-bold">Lab Exam Portal</span>
+                </a>
+            </div>
+            
+            <div class="dropdown">
+                <a class="nav-link dropdown-toggle d-flex align-items-center text-white" 
+                   href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                    <img src="<%= user.profileImage || 'https://via.placeholder.com/32x32/667eea/ffffff?text=' + user.firstName.charAt(0) + user.lastName.charAt(0) %>" 
+                         alt="Avatar" width="32" height="32" class="rounded-circle me-2" id="navbarAvatar">
+                    <span class="d-none d-sm-inline">
+                        <%= user.firstName %> <%= user.lastName %>
+                    </span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <div class="dropdown-header">
+                            <strong><%= user.firstName %> <%= user.lastName %></strong><br>
+                            <small class="text-muted"><%= user.email %></small><br>
+                            <span class="badge bg-primary"><%= user.role %></span>
+                        </div>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="/<%= user.role.toLowerCase() %>/settings">
+                        <i class="bi bi-gear me-2"></i>Settings
+                    </a></li>
+                    <li><a class="dropdown-item" href="#" onclick="confirmLogout()">
+                        <i class="bi bi-box-arrow-right me-2"></i>Logout
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h5 class="text-white mb-0"><%= user.role %> Portal</h5>
+            <small class="text-white-50">Account Settings</small>
+        </div>
+        
+        <ul class="sidebar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="/<%= user.role.toLowerCase() %>/dashboard">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <% if (user.role === 'Student') { %>
+                <li class="nav-item">
+                    <a class="nav-link" href="/student/classes">
+                        <i class="bi bi-book"></i>
+                        <span>My Classes</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/student/exams">
+                        <i class="bi bi-calendar-event"></i>
+                        <span>Upcoming Exams</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/student/results">
+                        <i class="bi bi-bar-chart"></i>
+                        <span>Latest Results</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/student/faculties">
+                        <i class="bi bi-people"></i>
+                        <span>Faculty Contacts</span>
+                    </a>
+                </li>
+            <% } %>
+        </ul>
+        
+        <div class="sidebar-footer">
+            <div class="text-center text-white-50 small">
+                <div class="mb-2">
+                    <i class="bi bi-gear me-1"></i>
+                    Account Settings
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="content-wrapper">
+            
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h1 class="page-title">
+                            <i class="bi bi-gear me-2"></i>
+                            Account Settings
+                        </h1>
+                        <p class="page-subtitle">Manage your account preferences and security settings</p>
+                    </div>
+                    <div class="col-auto">
+                        <div class="badge bg-info fs-6">
+                            <i class="bi bi-shield-check me-1"></i>
+                            Secure
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Success/Error Messages -->
+            <% if (success) { %>
+                <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <%= success %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <% } %>
+            
+            <% if (error) { %>
+                <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <%= error %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <% } %>
+            
+            <!-- Settings Tabs -->
+            <div class="row">
+                
+                <!-- Settings Navigation -->
+                <div class="col-lg-3 mb-4">
+                    <div class="card card-custom">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="bi bi-list-ul me-2"></i>
+                                Settings Menu
+                            </h6>
+                        </div>
+                        <div class="list-group list-group-flush">
+                            <a href="#profile" class="list-group-item list-group-item-action active" 
+                               data-bs-toggle="pill" role="tab">
+                                <i class="bi bi-person me-2"></i>
+                                Profile Information
+                            </a>
+                            <a href="#security" class="list-group-item list-group-item-action" 
+                               data-bs-toggle="pill" role="tab">
+                                <i class="bi bi-shield-lock me-2"></i>
+                                Security & Password
+                            </a>
+                            <a href="#notifications" class="list-group-item list-group-item-action" 
+                               data-bs-toggle="pill" role="tab">
+                                <i class="bi bi-bell me-2"></i>
+                                Notifications
+                            </a>
+                            <a href="#preferences" class="list-group-item list-group-item-action" 
+                               data-bs-toggle="pill" role="tab">
+                                <i class="bi bi-sliders me-2"></i>
+                                Preferences
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Settings Content -->
+                <div class="col-lg-9">
+                    <div class="tab-content">
+                        
+                        <!-- Profile Information Tab -->
+                        <div class="tab-pane fade show active" id="profile" role="tabpanel">
+                            <div class="card card-custom">
+                                <div class="card-header">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-person-circle me-2"></i>
+                                        Profile Information
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    
+                                    <!-- Profile Picture Section -->
+                                    <div class="profile-picture-section mb-4">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <div class="profile-avatar-large">
+                                                    <img src="<%= user.profileImage || 'https://via.placeholder.com/100x100/667eea/ffffff?text=' + user.firstName.charAt(0) + user.lastName.charAt(0) %>" 
+                                                         alt="Profile Picture" 
+                                                         class="rounded-circle"
+                                                         width="100" height="100"
+                                                         id="profileImage">
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <h6 class="mb-1"><%= user.firstName %> <%= user.lastName %></h6>
+                                                <p class="text-muted mb-2"><%= user.email %></p>
+                                                <span class="badge bg-primary"><%= user.role %></span>
+                                                <div class="mt-2">
+                                                    <button class="btn btn-outline-primary btn-sm" onclick="changeProfilePicture()">
+                                                        <i class="bi bi-camera me-1"></i>
+                                                        Change Picture
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Profile Form -->
+                                    <form id="profileForm">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" id="firstName" name="firstName" 
+                                                           value="<%= user.firstName %>" required>
+                                                    <label for="firstName">First Name</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" id="lastName" name="lastName" 
+                                                           value="<%= user.lastName %>" required>
+                                                    <label for="lastName">Last Name</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-floating mb-3">
+                                            <input type="email" class="form-control" id="email" name="email" 
+                                                   value="<%= user.email %>" required>
+                                            <label for="email">Email Address</label>
+                                        </div>
+                                        
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" id="username" name="username" 
+                                                   value="<%= user.username %>" required>
+                                            <label for="username">Username</label>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-end">
+                                            <button type="submit" class="btn btn-primary" id="updateProfileBtn">
+                                                <span class="spinner-border spinner-border-sm d-none me-2" id="profileSpinner"></span>
+                                                <i class="bi bi-check-lg me-2"></i>
+                                                Update Profile
+                                            </button>
+                                        </div>
+                                    </form>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Security Tab -->
+                        <div class="tab-pane fade" id="security" role="tabpanel">
+                            <div class="card card-custom">
+                                <div class="card-header">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-shield-lock me-2"></i>
+                                        Security & Password
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    
+                                    <!-- Change Password Form -->
+                                    <form id="passwordForm">
+                                        <div class="password-section mb-4">
+                                            <h6 class="section-title mb-3">Change Password</h6>
+                                            
+                                            <div class="form-floating mb-3">
+                                                <input type="password" class="form-control" id="currentPassword" 
+                                                       name="currentPassword" required>
+                                                <label for="currentPassword">Current Password</label>
+                                            </div>
+                                            
+                                            <div class="form-floating mb-3">
+                                                <input type="password" class="form-control" id="newPassword" 
+                                                       name="newPassword" required>
+                                                <label for="newPassword">New Password</label>
+                                                <div class="form-text">
+                                                    Password must be at least 6 characters with uppercase, lowercase, and number
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-floating mb-3">
+                                                <input type="password" class="form-control" id="confirmPassword" 
+                                                       name="confirmPassword" required>
+                                                <label for="confirmPassword">Confirm New Password</label>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-end">
+                                            <button type="submit" class="btn btn-warning" id="changePasswordBtn">
+                                                <span class="spinner-border spinner-border-sm d-none me-2" id="passwordSpinner"></span>
+                                                <i class="bi bi-key me-2"></i>
+                                                Change Password
+                                            </button>
+                                        </div>
+                                    </form>
+                                    
+                                    <!-- Security Info -->
+                                    <hr class="my-4">
+                                    <div class="security-info">
+                                        <h6 class="section-title mb-3">Security Information</h6>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="security-item">
+                                                    <i class="bi bi-calendar3 text-muted me-2"></i>
+                                                    <span class="security-label">Account Created:</span>
+                                                    <span class="security-value">
+                                                        <%= new Date(user.createdAt).toLocaleDateString() %>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="security-item">
+                                                    <i class="bi bi-clock text-muted me-2"></i>
+                                                    <span class="security-label">Last Login:</span>
+                                                    <span class="security-value">
+                                                        <%= user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Current Session' %>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Notifications Tab -->
+                        <div class="tab-pane fade" id="notifications" role="tabpanel">
+                            <div class="card card-custom">
+                                <div class="card-header">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-bell me-2"></i>
+                                        Notification Preferences
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    
+                                    <form id="notificationForm">
+                                        
+                                        <!-- Email Notifications -->
+                                        <div class="notification-section mb-4">
+                                            <h6 class="section-title mb-3">Email Notifications</h6>
+                                            
+                                            <div class="notification-item">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="emailExams" 
+                                                           name="emailExams" <%= (user.notificationSettings && user.notificationSettings.emailExams !== false) ? 'checked' : '' %>>
+                                                    <label class="form-check-label" for="emailExams">
+                                                        <strong>Exam Reminders</strong>
+                                                        <div class="notification-desc">Get notified about upcoming exams and assignments</div>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="notification-item">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="emailResults" 
+                                                           name="emailResults" <%= (user.notificationSettings && user.notificationSettings.emailResults !== false) ? 'checked' : '' %>>
+                                                    <label class="form-check-label" for="emailResults">
+                                                        <strong>Grade Updates</strong>
+                                                        <div class="notification-desc">Receive notifications when grades are published</div>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="notification-item">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="emailAnnouncements" 
+                                                           name="emailAnnouncements" <%= (user.notificationSettings && user.notificationSettings.emailAnnouncements !== false) ? 'checked' : '' %>>
+                                                    <label class="form-check-label" for="emailAnnouncements">
+                                                        <strong>Announcements</strong>
+                                                        <div class="notification-desc">Important updates from faculty and administration</div>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Push Notifications -->
+                                        <div class="notification-section mb-4">
+                                            <h6 class="section-title mb-3">Browser Notifications</h6>
+                                            
+                                            <div class="notification-item">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="pushNotifications" 
+                                                           name="pushNotifications" <%= (user.notificationSettings && user.notificationSettings.pushNotifications) ? 'checked' : '' %>>
+                                                    <label class="form-check-label" for="pushNotifications">
+                                                        <strong>Enable Browser Notifications</strong>
+                                                        <div class="notification-desc">Real-time notifications in your browser</div>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-end">
+                                            <button type="submit" class="btn btn-success" id="notificationBtn">
+                                                <span class="spinner-border spinner-border-sm d-none me-2" id="notificationSpinner"></span>
+                                                <i class="bi bi-check-lg me-2"></i>
+                                                Save Notification Settings
+                                            </button>
+                                        </div>
+                                        
+                                    </form>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Preferences Tab -->
+                        <div class="tab-pane fade" id="preferences" role="tabpanel">
+                            <div class="card card-custom">
+                                <div class="card-header">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-sliders me-2"></i>
+                                        Application Preferences
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    
+                                    <form id="preferencesForm">
+                                        
+                                        <!-- Dashboard Settings -->
+                                        <div class="preference-section mb-4">
+                                            <h6 class="section-title mb-3">Dashboard Display</h6>
+                                            
+                                            <div class="preference-item">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="showUpcoming" 
+                                                           name="showUpcoming" <%= (user.preferences && user.preferences.showUpcoming !== false) ? 'checked' : '' %>>
+                                                    <label class="form-check-label" for="showUpcoming">
+                                                        Show upcoming exams on dashboard
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="preference-item">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="showRecentGrades" 
+                                                           name="showRecentGrades" <%= (user.preferences && user.preferences.showRecentGrades !== false) ? 'checked' : '' %>>
+                                                    <label class="form-check-label" for="showRecentGrades">
+                                                        Display recent grades
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-end">
+                                            <button type="submit" class="btn btn-info" id="preferencesBtn">
+                                                <span class="spinner-border spinner-border-sm d-none me-2" id="preferencesSpinner"></span>
+                                                <i class="bi bi-check-lg me-2"></i>
+                                                Save Preferences
+                                            </button>
+                                        </div>
+                                        
+                                    </form>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+            </div>
+            
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/dashboard.js"></script>
+    
+    <script>
+        // Logout confirmation
+        function confirmLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/auth/logout';
+            }
+        }
+        
+        // Sidebar toggle
+        document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('show');
+        });
+        
+        // Profile Form - FUNCTIONAL
+        document.getElementById('profileForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('updateProfileBtn');
+            const spinner = document.getElementById('profileSpinner');
+            const originalText = btn.innerHTML;
+            
+            // Show loading state
+            btn.disabled = true;
+            spinner.classList.remove('d-none');
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Updating...`;
+            
+            const formData = new FormData(this);
+            
+            try {
+                const response = await fetch('/api/settings/update-profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        firstName: formData.get('firstName'),
+                        lastName: formData.get('lastName'),
+                        email: formData.get('email'),
+                        username: formData.get('username')
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('Profile updated successfully!', 'success');
+                    // Update navbar display
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast(result.message, 'danger');
+                }
+            } catch (error) {
+                showToast('Error updating profile', 'danger');
+                console.error('Profile update error:', error);
+            } finally {
+                // Reset button
+                btn.disabled = false;
+                spinner.classList.add('d-none');
+                btn.innerHTML = originalText;
+            }
+        });
+
+        // Password Form - FUNCTIONAL
+        document.getElementById('passwordForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('changePasswordBtn');
+            const spinner = document.getElementById('passwordSpinner');
+            const originalText = btn.innerHTML;
+            
+            const formData = new FormData(this);
+            const newPassword = formData.get('newPassword');
+            const confirmPassword = formData.get('confirmPassword');
+            
+            if (newPassword !== confirmPassword) {
+                showToast('Passwords do not match!', 'danger');
+                return;
+            }
+            
+            // Show loading state
+            btn.disabled = true;
+            spinner.classList.remove('d-none');
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Changing...`;
+            
+            try {
+                const response = await fetch('/api/settings/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        currentPassword: formData.get('currentPassword'),
+                        newPassword: formData.get('newPassword'),
+                        confirmPassword: formData.get('confirmPassword')
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('Password changed successfully!', 'success');
+                    this.reset(); // Clear form
+                } else {
+                    showToast(result.message, 'danger');
+                }
+            } catch (error) {
+                showToast('Error changing password', 'danger');
+                console.error('Password change error:', error);
+            } finally {
+                // Reset button
+                btn.disabled = false;
+                spinner.classList.add('d-none');
+                btn.innerHTML = originalText;
+            }
+        });
+
+        // Notification Form - FUNCTIONAL
+        document.getElementById('notificationForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('notificationBtn');
+            const spinner = document.getElementById('notificationSpinner');
+            const originalText = btn.innerHTML;
+            
+            // Show loading state
+            btn.disabled = true;
+            spinner.classList.remove('d-none');
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Saving...`;
+            
+            const formData = new FormData(this);
+            
+            try {
+                const response = await fetch('/api/settings/update-notifications', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                showToast(result.message, result.success ? 'success' : 'danger');
+            } catch (error) {
+                showToast('Error updating notifications', 'danger');
+                console.error('Notification update error:', error);
+            } finally {
+                // Reset button
+                btn.disabled = false;
+                spinner.classList.add('d-none');
+                btn.innerHTML = originalText;
+            }
+        });
+
+        // Preferences Form - FUNCTIONAL
+        document.getElementById('preferencesForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('preferencesBtn');
+            const spinner = document.getElementById('preferencesSpinner');
+            const originalText = btn.innerHTML;
+            
+            // Show loading state
+            btn.disabled = true;
+            spinner.classList.remove('d-none');
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Saving...`;
+            
+            const formData = new FormData(this);
+            
+            try {
+                const response = await fetch('/api/settings/update-preferences', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                showToast(result.message, result.success ? 'success' : 'danger');
+            } catch (error) {
+                showToast('Error updating preferences', 'danger');
+                console.error('Preferences update error:', error);
+            } finally {
+                // Reset button
+                btn.disabled = false;
+                spinner.classList.add('d-none');
+                btn.innerHTML = originalText;
+            }
+        });
+        
+        // Profile Picture Upload - LOGO FIX
+        function changeProfilePicture() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/jpeg,image/jpg,image/png,image/gif';
+        
+        input.onchange = async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('Image must be smaller than 5MB', 'danger');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('avatar', file);
+            showToast('Uploading image...', 'info');
+            
+            try {
+                const response = await fetch('/api/settings/upload-avatar', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('Profile picture updated!', 'success');
+                    const newAvatarUrl = result.avatarUrl + '?t=' + new Date().getTime();
+                    
+                    // ONLY update profile images, NOT logo
+                    const profileImage = document.getElementById('profileImage');
+                    if (profileImage) {
+                        profileImage.src = newAvatarUrl;
+                    }
+                    
+                    const navbarAvatar = document.getElementById('navbarAvatar');
+                    if (navbarAvatar) {
+                        navbarAvatar.src = newAvatarUrl;
+                    }
+                    
+                    // DO NOT update .navbar-brand img - removed this line completely
+                    
+                    console.log('✅ Updated profile images only');
+                } else {
+                    showToast(result.message || 'Upload failed', 'danger');
+                }
+            } catch (error) {
+                showToast('Error uploading image', 'danger');
+                console.error('Upload error:', error);
+            }
+        };
+        
+        input.click();
+    }
+        
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            toast.style.cssText = `
+                top: 80px;
+                right: 20px;
+                z-index: 9999;
+                min-width: 300px;
+                box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            `;
+            
+            const iconMap = {
+                success: 'bi-check-circle',
+                danger: 'bi-exclamation-triangle', 
+                warning: 'bi-exclamation-triangle',
+                info: 'bi-info-circle'
+            };
+            
+            toast.innerHTML = `
+                <i class="bi ${iconMap[type] || 'bi-info-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                const bsAlert = new bootstrap.Alert(toast);
+                bsAlert.close();
+            }, type === 'success' ? 4000 : 3000);
+        }
+    </script>
+    
+</body>
+</html>

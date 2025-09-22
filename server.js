@@ -1,7 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
-const rateLimit = require('express-rate-limit');
 const cors = require('cors');
 const path = require('path');
 const studentRoutes = require('./routes/student');
@@ -21,16 +20,6 @@ require('./config/database');
 
 // Trust proxy for Vercel
 app.set('trust proxy', 1);
-
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP
-  message: {
-    error: 'Too many requests, please try again later.'
-  }
-});
-app.use(limiter);
 
 // CORS configuration
 app.use(cors({
